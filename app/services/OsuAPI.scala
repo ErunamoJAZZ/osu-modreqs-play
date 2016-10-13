@@ -2,8 +2,9 @@ package services
 
 import java.time.LocalDateTime
 
-import model.{Beatmap, BeatmapsDAO, ModRequest, ModRequestsDAO}
+import model._
 import play.api.Configuration
+import play.api.libs.json.{JsDefined, JsUndefined, Json}
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.Future
@@ -15,7 +16,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
              wsClient: WSClient, configuration: Configuration) {
 
-  def modRequetPlz(nick:String, bm_type:Char, bm_id:String): Future[Unit] = {
+  implicit lazy val modeStaring_wr = Json.writes[ModeStaringJs]
+
+  def modRequetPlz(nick: String, bm_type: Char, bm_id: String): Future[Unit] = {
 
     val osuApiKey = configuration.getConfig("osu").flatMap(_.getString("key")).getOrElse("")
     //ToDo!!!!!!!!!!!
@@ -24,15 +27,57 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
     //https://b.ppy.sh/thumb/______s_id_.jpg
     //https://b.ppy.sh/preview/______s_id_.mp3
 
-    //"difficultyrating"
-    //"bpm"
+    val query_base = s"https://osu.ppy.sh/api/get_beatmaps?k=$osuApiKey"
 
-    val query_url = s"https://osu.ppy.sh/api/get_beatmaps?k=$osuApiKey&$bm_type=$bm_id"
-    println(query_url)
-    wsClient.url(query_url).get().map{ r =>
+    val query_general = s"$query_base&$bm_type=$bm_id"
+    println(query_general)
+    wsClient.url(query_general).get().map { r =>
       println(r.toString)
-      beatmapsDAO.insert(Beatmap(None, r.json))
-      modRequestsDAO.insert(ModRequest(None, LocalDateTime.now,nick, 0))
+
+      //get beatmap_id from array head
+      r.json.head match {
+        case JsUndefined() => play.Logger.warn("Mapset does not exist?")
+        case JsDefined(jsHead) =>
+          (jsHead \ "beatmap_id").asOpt[String] match {
+            case Some(beatmap_id) =>
+
+              //Insert or Update Beatmap information
+              beatmapsDAO.insert(
+                Beatmap(
+                  beatmap_id.toLong,
+                  (jsHead \ "artist").asOpt[String],
+                  (jsHead \ "title").asOpt[String],
+                  (jsHead \ "creator").asOpt[String],
+                  (jsHead \ "bpm").asOpt[String],
+                  (jsHead \ "favourite_count").asOpt[String]
+                ))
+
+              //Get all maps in set
+              wsClient.url(s"$query_base&s=$beatmap_id").get().map { list_maps =>
+                val stars = (list_maps.json \\ "difficultyrating").map(_.as[String].toDouble)
+                val versions = (list_maps.json \\ "version").map(_.as[String])
+                val modes = (list_maps.json \\ "mode").map(_.as[String].toShort)
+
+                val listModeStar = stars.zip(versions).zip(modes).map {
+                  case ((star, version), mode) =>
+                    ModeStaringJs(star, version, mode)
+                }
+                val lms_js = Json.toJson(listModeStar.sortBy(k => (k.mode, k.difficultyrating)))
+
+                modRequestsDAO.insert(
+                  ModRequest(
+                    None,
+                    LocalDateTime.now,
+                    nick,
+                    lms_js,
+                    beatmap_id.toLong
+                  ))
+              }
+            case None => play.Logger.warn("Strange case where beatmap_id does not exist??")
+          }
+      }
+
+
     }
 
 

@@ -33,7 +33,7 @@ class SurveysTable(tag: Tag) extends Table[Survey](tag, "survey") {
   val beatmap_id = column[Long]("beatmap_id")
 
   lazy val beatmapFk = foreignKey("bm_survey_fk", beatmap_id, DAO.BeatmapsQuery)(r =>
-    r.id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
+    r.beatmapset_id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
 }
 
 class SurveysDAO (dbConfig: DatabaseConfig[JdbcProfile]) {

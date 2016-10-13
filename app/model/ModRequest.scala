@@ -15,30 +15,38 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /*
  * Tipo de clase para la utilización de albumes.
  */
+case class ModeStaringJs(
+                          difficultyrating: Double,
+                          version: String,
+                          mode: Short
+                        )
+
 case class ModRequest(
                        id: Option[Long],
                        time: LocalDateTime,
                        nick: String,
+                       set: JsValue, //List[ModeStaringJs]
                        beatmap_id: Long)
 
 /*
  * Clase Tabla, donde se define el mapeo Objeto-Relacional
  */
 class ModRequestsTable(tag: Tag) extends Table[ModRequest](tag, "mod_request") {
-  def * = (id.?, time, nick, beatmap_id) <> (ModRequest.tupled, ModRequest.unapply)
+  def * = (id.?, time, nick, set, beatmap_id) <> (ModRequest.tupled, ModRequest.unapply)
 
   val id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   val time = column[LocalDateTime]("time")
   val nick = column[String]("nick")
+  val set = column[JsValue]("artist", O.SqlType("TEXT"))
   val beatmap_id = column[Long]("beatmap_id")
 
   lazy val beatmapFk = foreignKey("bm_survey_fk", beatmap_id, DAO.BeatmapsQuery)(r =>
-    r.id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
+    r.beatmapset_id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
 }
 
-class ModRequestsDAO (dbConfig: DatabaseConfig[JdbcProfile]) {
+class ModRequestsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
 
-  def insert(m:ModRequest): Future[Long] = {
+  def insert(m: ModRequest): Future[Long] = {
     val a = (DAO.ModRequestsQuery returning DAO.ModRequestsQuery.map(_.id)) += m
     dbConfig.db.run(a)
   }

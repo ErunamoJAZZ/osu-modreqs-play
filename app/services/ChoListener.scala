@@ -7,13 +7,17 @@ import java.time.LocalDateTime
 import model.ModRequest
 import play.api.Configuration
 import akka.actor.ActorSystem
+import play.api.inject.ApplicationLifecycle
+
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 /**
   * Created by erunamo on 8/10/16.
   */
 class ChoListener(
+                   //lifecycle: ApplicationLifecycle, //ToDo
                    configuration: Configuration,
                    actorSystem: ActorSystem,
                    osuAPI: OsuAPI) {
@@ -41,10 +45,25 @@ class ChoListener(
     val reader = new BufferedReader(
       new InputStreamReader(socket.getInputStream))
 
+    /**
+      * Code for close connection in restart server
+      * ToDo
+      */
+    /*lifecycle.addStopHook { () =>
+      Future.successful {
+        writer.write(s"QUIT :Good bye!\r\n")
+        writer.flush()
+        writer.close()
+        reader.close()
+        socket.close()
+        println("<<<<    Connection closed!!!!!    >>>>")
+      }
+    }*/
+
     // Log on to the server.
     writer.write("PASS " + pass + "\r\n")
     writer.write("NICK " + nick + "\r\n")
-    writer.write("USER " + login + " 8 * : Java IRC Testing\r\n")
+    writer.write("USER " + login + " 8 * : Modreqs Scala Testing\r\n")
     writer.flush()
 
     //Read lines in a stream!
@@ -53,26 +72,24 @@ class ChoListener(
       .foreach { line =>
 
         /**
-          * Caso más común. Simplemente ignora esos  mensajes.
+          * Most common case. Ignore all Join, Part, and Quit messages.
           */
         if (line.contains("JOIN :") || line.contains("PART :") || line.contains("QUIT :")) {
           Unit
         }
 
         /**
-          * Caso del PING. Se requiere para que el servidor no lo desconecte.
+          * Ping case. Necessary to avoid disconnections.
           */
         else if (line.startsWith("PING ")) {
           println(s"<ping>: $line")
           // We must respond to PINGs to avoid being disconnected.
           writer.write(s"PONG ${line.substring(5)}\r\n")
-          //writer.write("PRIVMSG " + channel + " :I got pinged!\r\n")
           writer.flush()
         }
 
         /**
-          * Caso chévere.
-          * Acá se rescata las url y quién lo hizo.
+          * Nice case. Get the map Url using matchPattern.
           */
         else if (line.indexOf(privmsg) > -1) {
           val text = line.substring(line.indexOf(privmsg) + privmsg.length)
@@ -84,8 +101,9 @@ class ChoListener(
             .toList
             .map { bm_url =>
               println(s"m -- $bm_url")
-              val id_type = bm_url.group(4).charAt(1) // 'b' or 's'
-            val id = bm_url.group(5)
+              // id_type could be 'b' or 's'
+              val id_type = bm_url.group(4).charAt(1)
+              val id = bm_url.group(5)
               (id_type, id)
             }
 
@@ -99,7 +117,7 @@ class ChoListener(
         }
 
         /**
-          * Cuando se acaba de conectar, que lo meta dentro del canal
+          * Case for join in #modreqs, after server connection was all ready.
           */
         else if (line.indexOf("376") >= 0) {
           writer.write("JOIN " + channel + "\r\n")
@@ -107,7 +125,7 @@ class ChoListener(
         }
 
         /**
-          * Nada...
+          * Nothing... just to debug.
           */
         else {
           // Print the raw line received by the bot.

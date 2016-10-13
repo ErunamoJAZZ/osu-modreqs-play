@@ -12,8 +12,8 @@ import play.api.libs.ws.ahc.AhcWSComponents
 import akka.actor.ActorSystem
 
 /**
- * Application loader that wires up the application dependencies using Macwire
- */
+  * Application loader that wires up the application dependencies using Macwire
+  */
 class GreetingApplicationLoader extends ApplicationLoader {
   def load(context: Context): Application = {
     (new BuiltInComponentsFromContext(context) with GreetingComponents).application
