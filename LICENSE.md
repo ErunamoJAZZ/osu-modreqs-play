@@ -1,1 +1,4 @@
-You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission. 
+Hey, Ask before pls. Thanks.
+
+
+http://stackoverflow.com/questions/3319479/git-can-i-commit-a-file-and-ignore-the-content-changes
