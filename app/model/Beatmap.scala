@@ -11,6 +11,7 @@ import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 
 /*
  * Tipo de clase para la utilización de albumes.
@@ -44,19 +45,29 @@ class BeatmapsTable(tag: Tag) extends Table[Beatmap](tag, "beatmap") {
 class BeatmapsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
 
   def insert(m: Beatmap) = {
-    play.Logger.debug(s"Inserting or updating Beatmap: $m")
-    val a = DAO.BeatmapsQuery.insertOrUpdate(m)
-    val res = dbConfig.db.run(a)
+    val runned = dbConfig.db.run(DAO.BeatmapsQuery.insertOrUpdate(m))
 
-    res.onComplete(e => play.Logger.debug(s"$e"))
-    res
+    runned.onComplete {
+      case Success(s) => play.Logger.debug(s"Inserted '${m.title.getOrElse("<none>")}' in Beatmap")
+      case Failure(e) => play.Logger.error(s"Error in table Beatmap: $e")
+    }
+    runned
   }
 
+  /**
+    *
+    * @param beatmapset_id
+    * @return
+    */
   def get(beatmapset_id: Long): Future[Option[Beatmap]] = {
     val q = DAO.BeatmapsQuery.filter(_.beatmapset_id === beatmapset_id)
     dbConfig.db.run(q.result.headOption)
   }
 
+  /**
+    *
+    * @return
+    */
   def getLast2days: Future[Seq[Beatmap]] = {
     val twoDaysAgo = LocalDateTime.now.minusDays(2)
     val q = for {

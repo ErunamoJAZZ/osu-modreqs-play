@@ -11,6 +11,7 @@ import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 
 /*
  * Tipo de clase para la utilización de albumes.
@@ -36,11 +37,17 @@ class SurveysTable(tag: Tag) extends Table[Survey](tag, "survey") {
     r.beatmapset_id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
 }
 
-class SurveysDAO (dbConfig: DatabaseConfig[JdbcProfile]) {
+class SurveysDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
 
-  def insert(m:Survey): Future[Long] = {
+  def insert(m: Survey): Future[Long] = {
     val a = (DAO.SurveysQuery returning DAO.SurveysQuery.map(_.id)) += m
-    dbConfig.db.run(a)
+    val runned = dbConfig.db.run(a)
+
+    runned.onComplete {
+      case Success(s) => play.Logger.debug(s"Inserted a new Survey. Id: $s")
+      case Failure(e) => play.Logger.error(s"Error in table Survey: $e")
+    }
+    runned
   }
 
 }

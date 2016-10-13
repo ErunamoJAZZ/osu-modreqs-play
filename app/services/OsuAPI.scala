@@ -16,24 +16,32 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
              wsClient: WSClient, configuration: Configuration) {
 
+  //translate ModeStaringJs class to Json
   implicit lazy val modeStaring_wr = Json.writes[ModeStaringJs]
 
-  def modRequetPlz(nick: String, bm_type: Char, bm_id: String): Future[Unit] = {
+  /**
+    * MOD MY MAP PLEASEEEEE :3
+    *
+    * @param nick
+    * @param bm_type
+    * @param bm_id
+    * @return
+    */
+  def modRequetPlz(nick: String, bm_type: Char, bm_id: String): Future[_] = {
 
+    //get the osuApiKey form configuration
     val osuApiKey = configuration.getConfig("osu").flatMap(_.getString("key")).getOrElse("")
-    //ToDo!!!!!!!!!!!
-    //Consulta el id principal de mapa, y guarda una copia del json.
 
     //https://b.ppy.sh/thumb/______s_id_.jpg
     //https://b.ppy.sh/preview/______s_id_.mp3
 
+    //Base url
     val query_base = s"https://osu.ppy.sh/api/get_beatmaps?k=$osuApiKey"
 
-    val query_general = s"$query_base&$bm_type=$bm_id"
-    println(query_general)
-    wsClient.url(query_general).get().map { r =>
-      println(r.toString)
-
+    /**
+      * Ask to peppy's api. Thanks peppy ;)
+      */
+    wsClient.url(s"$query_base&$bm_type=$bm_id").get().map { r =>
       //get beatmap_id from array head
       r.json.head match {
         case JsUndefined() => play.Logger.warn("Mapset does not exist?")
@@ -62,6 +70,7 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
                   case ((star, version), mode) =>
                     ModeStaringJs(star, version, mode)
                 }
+                //summary of current diffs in MapSet
                 val lms_js = Json.toJson(listModeStar.sortBy(k => (k.mode, k.difficultyrating)))
 
                 modRequestsDAO.insert(
@@ -76,14 +85,8 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
             case None => play.Logger.warn("Strange case where beatmap_id does not exist??")
           }
       }
-
-
+    }.recover {
+      case e => play.Logger.error(s"Error in OsuAPI: $e")
     }
-
-
-
-
-
-    Future.successful(Unit)
   }
 }

@@ -11,6 +11,7 @@ import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 
 /*
  * Tipo de clase para la utilización de albumes.
@@ -46,11 +47,27 @@ class ModRequestsTable(tag: Tag) extends Table[ModRequest](tag, "mod_request") {
 
 class ModRequestsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
 
+  /**
+    *
+    * @param m
+    * @return
+    */
   def insert(m: ModRequest): Future[Long] = {
     val a = (DAO.ModRequestsQuery returning DAO.ModRequestsQuery.map(_.id)) += m
-    dbConfig.db.run(a)
+    val runned = dbConfig.db.run(a)
+
+    runned.onComplete {
+      case Success(s) => play.Logger.debug(s"Inserted in ModRequest. Id: $s")
+      case Failure(e) => play.Logger.error(s"Error in table ModRequest: $e")
+    }
+    runned
   }
 
+  /**
+    *
+    * @param ms
+    * @return
+    */
   def insert(ms: List[ModRequest]): Future[Seq[Long]] = {
     val a = (DAO.ModRequestsQuery returning DAO.ModRequestsQuery.map(_.id)) ++= ms
     dbConfig.db.run(a)
