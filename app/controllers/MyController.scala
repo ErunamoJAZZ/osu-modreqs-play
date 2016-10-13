@@ -15,12 +15,16 @@ class MyController(
                     beatmapsDAO: BeatmapsDAO) extends Controller {
 
 
-  def test(t:String,map:String) = Action.async {
-    osuApi.modRequetPlz("Eru",t.charAt(0), map).map(_ => Ok)
+  def test(t: String, map: String) = Action.async {
+    osuApi.modRequetPlz("Eru", t.charAt(0), map).map(_ => Ok)
   }
 
   def index = Action {
-    Ok(Html("<h1>Welcome</h1><p>Your new application is ready.</p>"))
+    Ok(views.html.beatmaps())
+  }
+
+  def about = Action {
+    Ok(views.html.about())
   }
 
   def createDB = Action.async {

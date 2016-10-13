@@ -1,6 +1,7 @@
 
 GET        /                    controllers.MyController.index
-GET        /test/:t/:map        controllers.MyController.test(t,map)
+GET        /about               controllers.MyController.about
+#GET        /test/:t/:map        controllers.MyController.test(t,map)
 GET        /db/create           controllers.MyController.createDB
 GET        /db/drop             controllers.MyController.dropDB
 
