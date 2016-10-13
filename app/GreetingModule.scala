@@ -5,6 +5,9 @@ import play.api.i18n.Langs
 import services.ServicesModule
 import slick.driver.JdbcProfile
 import play.api.Configuration
+import play.api.libs.ws.WSClient
+import services.{OsuAPI, ChoListener}
+import akka.actor.ActorSystem
 
 trait GreetingModule extends ServicesModule {
 
@@ -14,11 +17,18 @@ trait GreetingModule extends ServicesModule {
 
   def configuration: Configuration
 
+  def wsClient: WSClient
+
+  def actorSystem: ActorSystem
+
   lazy val creatorDB = wire[CreatorDB]
   lazy val beatmapsDAO = wire[BeatmapsDAO]
   lazy val modRequest = wire[ModRequestsDAO]
   lazy val surveysDAO = wire[SurveysDAO]
   lazy val greeterController = wire[GreeterController]
+
+  lazy val osuApi = wire[OsuAPI]
+  val choListener = wire[ChoListener]
 
   def langs: Langs
 }

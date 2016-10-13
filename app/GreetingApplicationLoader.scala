@@ -8,6 +8,8 @@ import play.api.routing.Router
 import router.Routes
 import slick.driver.JdbcProfile
 import play.api.db.slick.{DbName, SlickComponents}
+import play.api.libs.ws.ahc.AhcWSComponents
+import akka.actor.ActorSystem
 
 /**
  * Application loader that wires up the application dependencies using Macwire
@@ -21,6 +23,7 @@ class GreetingApplicationLoader extends ApplicationLoader {
 trait GreetingComponents
   extends BuiltInComponents
     with GreetingModule
+    with AhcWSComponents // for wsClient
     with I18nComponents
     with DatabaseSlickModule {
   lazy val assets: Assets = wire[Assets]
