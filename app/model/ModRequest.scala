@@ -72,4 +72,14 @@ class ModRequestsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
     val a = (DAO.ModRequestsQuery returning DAO.ModRequestsQuery.map(_.id)) ++= ms
     dbConfig.db.run(a)
   }
+
+  /**
+    *
+    * @return
+    */
+  def getLast2days: Future[Seq[ModRequest]] = {
+    val twoDaysAgo = LocalDateTime.now.minusDays(2)
+    val q = DAO.ModRequestsQuery.filter(_.time > twoDaysAgo)
+    dbConfig.db.run(q.sortBy(_.time.desc).result)
+  }
 }

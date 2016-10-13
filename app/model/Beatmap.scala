@@ -66,17 +66,12 @@ class BeatmapsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
 
   /**
     *
+    * @param beatmapset_ids
     * @return
     */
-  def getLast2days: Future[Seq[Beatmap]] = {
-    val twoDaysAgo = LocalDateTime.now.minusDays(2)
-    val q = for {
-      b <- DAO.BeatmapsQuery
-      r <- DAO.ModRequestsQuery
-      if b.beatmapset_id === r.beatmap_id &&
-        r.time > twoDaysAgo
-    } yield b
-    dbConfig.db.run(q.result)
+  def getInSet(beatmapset_ids: Seq[Long]): Future[Seq[Beatmap]] = {
+    val q = DAO.BeatmapsQuery.filter(_.beatmapset_id.inSet(beatmapset_ids))
+    dbConfig.db.run(q.distinct.result)
   }
 
 }

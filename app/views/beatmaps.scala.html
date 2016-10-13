@@ -1,5 +1,24 @@
-@()
+@import model.{Beatmap, ModRequest}
+@(maps: Seq[(ModRequest, Beatmap)])
 
-@index("Beatmaps"){
+
+@index("Beatmaps") {
     <h1>Beatmaps</h1>
+    <div class="pure-g">
+
+        @for(mm <- maps) {
+            <div class="pure-u-1-2">
+                @defining("https://b.ppy.sh/thumb/" + mm._1.beatmap_id + ".jpg") { thumb =>
+                    <img src="@thumb">
+                }
+                @defining("https://osu.ppy.sh/s/" + mm._1.beatmap_id ) { url =>
+                    <a href="@url" target="_blank">go to map.</a>
+                }
+                <p>@{mm._2.title}</p>
+            </div>
+        }
+
+    </div>
+
+
 }
