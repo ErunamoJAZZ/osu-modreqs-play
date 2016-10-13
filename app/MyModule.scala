@@ -21,7 +21,7 @@ trait GreetingModule {
 
   def actorSystem: ActorSystem
 
-  //def lifecycle: ApplicationLifecycle
+  def applicationLifecycle: ApplicationLifecycle
 
   lazy val creatorDB = wire[CreatorDB]
   lazy val beatmapsDAO = wire[BeatmapsDAO]
@@ -30,5 +30,5 @@ trait GreetingModule {
   lazy val greeterController = wire[GreeterController]
 
   lazy val osuApi = wire[OsuAPI]
-  lazy val choListener = wire[ChoListener]
+  val choListener = wire[ChoListener]
 }

@@ -17,13 +17,16 @@ import scala.concurrent.Future
   * Created by erunamo on 8/10/16.
   */
 class ChoListener(
-                   //lifecycle: ApplicationLifecycle, //ToDo
+                   lifecycle: ApplicationLifecycle, //ToDo
                    configuration: Configuration,
                    actorSystem: ActorSystem,
                    osuAPI: OsuAPI) {
 
 
   actorSystem.scheduler.scheduleOnce(3.seconds) {
+
+    println("Init ChoListener Service!!!")
+
     val server = "cho.ppy.sh"
     val pass = configuration.getConfig("irc").flatMap(_.getString("serverPassword")).getOrElse("")
     val nick = configuration.getConfig("irc").flatMap(_.getString("username")).getOrElse("")
@@ -49,7 +52,7 @@ class ChoListener(
       * Code for close connection in restart server
       * ToDo
       */
-    /*lifecycle.addStopHook { () =>
+    lifecycle.addStopHook { () =>
       Future.successful {
         writer.write(s"QUIT :Good bye!\r\n")
         writer.flush()
@@ -58,7 +61,7 @@ class ChoListener(
         socket.close()
         println("<<<<    Connection closed!!!!!    >>>>")
       }
-    }*/
+    }
 
     // Log on to the server.
     writer.write("PASS " + pass + "\r\n")
