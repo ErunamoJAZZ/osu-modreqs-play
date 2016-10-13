@@ -43,11 +43,13 @@ class BeatmapsTable(tag: Tag) extends Table[Beatmap](tag, "beatmap") {
 
 class BeatmapsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
 
-  def insert(m: Beatmap): Future[Option[Long]] = {
-    val a = (DAO.BeatmapsQuery returning DAO.BeatmapsQuery
-      .map(_.beatmapset_id))
-      .insertOrUpdate(m)
-    dbConfig.db.run(a)
+  def insert(m: Beatmap) = {
+    play.Logger.debug(s"Inserting or updating Beatmap: $m")
+    val a = DAO.BeatmapsQuery.insertOrUpdate(m)
+    val res = dbConfig.db.run(a)
+
+    res.onComplete(e => play.Logger.debug(s"$e"))
+    res
   }
 
   def get(beatmapset_id: Long): Future[Option[Beatmap]] = {

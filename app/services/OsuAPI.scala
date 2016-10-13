@@ -38,13 +38,13 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
       r.json.head match {
         case JsUndefined() => play.Logger.warn("Mapset does not exist?")
         case JsDefined(jsHead) =>
-          (jsHead \ "beatmap_id").asOpt[String] match {
-            case Some(beatmap_id) =>
+          (jsHead \ "beatmapset_id").asOpt[String] match {
+            case Some(beatmapset_id) =>
 
               //Insert or Update Beatmap information
               beatmapsDAO.insert(
                 Beatmap(
-                  beatmap_id.toLong,
+                  beatmapset_id.toLong,
                   (jsHead \ "artist").asOpt[String],
                   (jsHead \ "title").asOpt[String],
                   (jsHead \ "creator").asOpt[String],
@@ -53,7 +53,7 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
                 ))
 
               //Get all maps in set
-              wsClient.url(s"$query_base&s=$beatmap_id").get().map { list_maps =>
+              wsClient.url(s"$query_base&s=$beatmapset_id").get().map { list_maps =>
                 val stars = (list_maps.json \\ "difficultyrating").map(_.as[String].toDouble)
                 val versions = (list_maps.json \\ "version").map(_.as[String])
                 val modes = (list_maps.json \\ "mode").map(_.as[String].toShort)
@@ -70,7 +70,7 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
                     LocalDateTime.now,
                     nick,
                     lms_js,
-                    beatmap_id.toLong
+                    beatmapset_id.toLong
                   ))
               }
             case None => play.Logger.warn("Strange case where beatmap_id does not exist??")

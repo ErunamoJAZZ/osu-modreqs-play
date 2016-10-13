@@ -1,8 +1,7 @@
 
-GET        /                    controllers.GreeterController.index
-GET        /greetings           controllers.GreeterController.greetings
-GET        /greet               controllers.GreeterController.greetInMyLanguage
-GET        /db/create           controllers.GreeterController.createDB
-GET        /db/drop             controllers.GreeterController.dropDB
+GET        /                    controllers.MyController.index
+GET        /test/:t/:map        controllers.MyController.test(t,map)
+GET        /db/create           controllers.MyController.createDB
+GET        /db/drop             controllers.MyController.dropDB
 
 GET        /assets/*file        controllers.Assets.at(path="/public", file)

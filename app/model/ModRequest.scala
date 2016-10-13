@@ -37,7 +37,7 @@ class ModRequestsTable(tag: Tag) extends Table[ModRequest](tag, "mod_request") {
   val id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   val time = column[LocalDateTime]("time")
   val nick = column[String]("nick")
-  val set = column[JsValue]("artist", O.SqlType("TEXT"))
+  val set = column[JsValue]("set", O.SqlType("TEXT"))
   val beatmap_id = column[Long]("beatmap_id")
 
   lazy val beatmapFk = foreignKey("bm_survey_fk", beatmap_id, DAO.BeatmapsQuery)(r =>

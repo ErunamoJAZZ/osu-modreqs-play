@@ -1,4 +1,4 @@
-import controllers.GreeterController
+import controllers.MyController
 import model.{BeatmapsDAO, CreatorDB, ModRequestsDAO, SurveysDAO}
 import slick.backend.DatabaseConfig
 import play.api.i18n.Langs
@@ -27,7 +27,7 @@ trait GreetingModule {
   lazy val beatmapsDAO = wire[BeatmapsDAO]
   lazy val modRequest = wire[ModRequestsDAO]
   lazy val surveysDAO = wire[SurveysDAO]
-  lazy val greeterController = wire[GreeterController]
+  lazy val greeterController = wire[MyController]
 
   lazy val osuApi = wire[OsuAPI]
   val choListener = wire[ChoListener]
