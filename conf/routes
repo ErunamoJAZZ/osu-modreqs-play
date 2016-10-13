@@ -1,0 +1,8 @@
+
+GET        /                    controllers.GreeterController.index
+GET        /greetings           controllers.GreeterController.greetings
+GET        /greet               controllers.GreeterController.greetInMyLanguage
+GET        /db/create           controllers.GreeterController.createDB
+GET        /db/drop             controllers.GreeterController.dropDB
+
+GET        /assets/*file        controllers.Assets.at(path="/public", file)
