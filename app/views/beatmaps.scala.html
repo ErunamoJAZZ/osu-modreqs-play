@@ -7,25 +7,24 @@
         <div class="pure-g">
 
         @for(((mr, bm), idx) <- maps) {
+            @defining((s"https://b.ppy.sh/thumb/${mr.beatmap_id}l.jpg",
+                    "https://osu.ppy.sh/s/" + mr.beatmap_id)) { case (thumb, url) =>
             <div class="pure-u-1-2">
                 <div class="card">
-                    <h3>@bm.title</h3>
+                    <h3><a href="@url" target="_blank">@bm.title</a></h3>
                     <span class="order">@(idx + 1)</span>
-
-                    @defining((s"https://b.ppy.sh/thumb/${mr.beatmap_id}l.jpg",
-                            "https://osu.ppy.sh/s/" + mr.beatmap_id)) { case (thumb, url) =>
                     <div class="box">
-                        <img src="@thumb">
+                        <a href="@url" target="_blank"><img src="@thumb"></a>
                         <div>
-                            <a href="@url" target="_blank">go to map.</a>
+
                             <p>Artist: @bm.artist</p>
                             <p>Creator: @bm.creator (posted by <span title="@mr.time">@mr.nick</span>)</p>
                             <p>BPM: @bm.bpm , Favs: @bm.favourite_count</p>
-                    </div>
-                    </div>
-                    }
-                </div>
             </div>
+            </div>
+            </div>
+            </div>
+            }
         }
         </div>
 

@@ -100,7 +100,7 @@ class ModRequestsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
     dbConfig.db.run(q.distinct.result).flatMap { beats =>
       val a = beats.map { b =>
         dbConfig.db.run(DAO.ModRequestsQuery
-          .filter(_.beatmap_id === b.beatmapset_id).sortBy(_.time).result.head)
+          .filter(_.beatmap_id === b.beatmapset_id).sortBy(_.time.desc).result.head)
           .map(m => (m, b))
       }
       Future.sequence(a)
