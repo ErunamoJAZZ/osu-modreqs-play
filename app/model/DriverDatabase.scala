@@ -40,5 +40,10 @@ object DriverDatabase extends SQLiteDriver {
       json => json.toString,
       str => Json.parse(str)
     )
+    implicit def ModeStaringJs2String = MappedColumnType.base[ModeStaringJs, String](
+      ms => Json.toJson(ms).toString,
+      str => Json.parse(str).as[ModeStaringJs]
+    )
+    implicit lazy val modeStaring_fmt = Json.format[ModeStaringJs]
   }
 }
