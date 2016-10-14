@@ -80,6 +80,37 @@ class ModRequestsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
   def getLast2days: Future[Seq[ModRequest]] = {
     val twoDaysAgo = LocalDateTime.now.minusDays(2)
     val q = DAO.ModRequestsQuery.filter(_.time > twoDaysAgo)
-    dbConfig.db.run(q.sortBy(_.time.desc).result)
+
+    dbConfig.db.run(q.sortBy(_.time.asc).result)
+  }
+
+  /**
+    *
+    * @return
+    */
+  def getLast2days222: Future[Seq[(ModRequest, Beatmap)]] = {
+    val twoDaysAgo = LocalDateTime.now.minusDays(2)
+    val q = for {
+      b <- DAO.BeatmapsQuery
+      m <- DAO.ModRequestsQuery
+      if b.beatmapset_id === m.beatmap_id &&
+        m.time > twoDaysAgo
+    } yield b
+
+    dbConfig.db.run(q.distinct.result).flatMap { beats =>
+      val a = beats.map { b =>
+        dbConfig.db.run(DAO.ModRequestsQuery
+          .filter(_.beatmap_id === b.beatmapset_id).sortBy(_.time).result.head)
+          .map(m => (m, b))
+      }
+      Future.sequence(a)
+    }
+    /*val q2 = for {
+      bm <- q.distinct
+      mr <- DAO.ModRequestsQuery.filter(_.beatmap_id === bm.beatmapset_id).sortBy(_.time.desc).take(1)
+    } yield {
+      (mr, bm)
+    }
+    dbConfig.db.run(q2.result)*/
   }
 }

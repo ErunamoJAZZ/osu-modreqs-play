@@ -1,24 +1,33 @@
 @import model.{Beatmap, ModRequest}
-@(maps: Seq[(ModRequest, Beatmap)])
+@(maps: Seq[((ModRequest, Beatmap), Int)])
 
 
-@index("Beatmaps") {
-    <h1>Beatmaps</h1>
-    <div class="pure-g">
+    @index("Beatmaps") {
+        <h1>Beatmaps</h1>
+        <div class="pure-g">
 
-        @for(mm <- maps) {
+        @for(((mr, bm), idx) <- maps) {
             <div class="pure-u-1-2">
-                @defining("https://b.ppy.sh/thumb/" + mm._1.beatmap_id + ".jpg") { thumb =>
-                    <img src="@thumb">
-                }
-                @defining("https://osu.ppy.sh/s/" + mm._1.beatmap_id ) { url =>
-                    <a href="@url" target="_blank">go to map.</a>
-                }
-                <p>@{mm._2.title}</p>
+                <div class="card">
+                    <h3>@bm.title</h3>
+                    <span class="order">@(idx + 1)</span>
+
+                    @defining((s"https://b.ppy.sh/thumb/${mr.beatmap_id}l.jpg",
+                            "https://osu.ppy.sh/s/" + mr.beatmap_id)) { case (thumb, url) =>
+                    <div class="box">
+                        <img src="@thumb">
+                        <div>
+                            <a href="@url" target="_blank">go to map.</a>
+                            <p>Artist: @bm.artist</p>
+                            <p>Creator: @bm.creator (posted by <span title="@mr.time">@mr.nick</span>)</p>
+                            <p>BPM: @bm.bpm , Favs: @bm.favourite_count</p>
+                    </div>
+                    </div>
+                    }
+                </div>
             </div>
         }
+        </div>
 
-    </div>
 
-
-}
+    }

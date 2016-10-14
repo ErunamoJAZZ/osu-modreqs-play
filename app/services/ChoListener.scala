@@ -123,7 +123,9 @@ class ChoListener(
           * Case for join in #modreqs, after server connection was all ready.
           */
         else if (line.indexOf("376") >= 0) {
-          writer.write("JOIN " + channel + "\r\n")
+          writer.write(s"JOIN $channel\r\n")
+          writer.write(s"AWAY :Hi, if I don't answer in a while and it is important, " +
+            s"try send me a message in forum please. (PD: use #modreqs !!!)\r\n")
           writer.flush()
         }
 
@@ -135,5 +137,7 @@ class ChoListener(
           println(s"<> => '$line'")
         }
       }
+
+    //java.net.SocketException:
   }
 }

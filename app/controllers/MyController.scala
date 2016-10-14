@@ -1,5 +1,7 @@
 package controllers
 
+import java.time.{LocalDateTime, ZoneOffset}
+
 import model.{Beatmap, BeatmapsDAO, CreatorDB, ModRequestsDAO}
 import play.api.i18n.Langs
 import play.api.libs.json.Json
@@ -15,7 +17,7 @@ class MyController(
                     beatmapsDAO: BeatmapsDAO,
                     modRequestsDAO: ModRequestsDAO) extends Controller {
 
-  //implicit val localDateOrdering: Ordering[LocalDateTime] = Ordering.by(_.toEpochDay)
+  implicit val localDateOrdering: Ordering[LocalDateTime] = Ordering.by(_.toEpochSecond(ZoneOffset.ofHours(-5)))
 
   def test(t: String, map: String) = Action.async {
     osuApi.modRequetPlz("Eru", t.charAt(0), map).map(_ => Ok)
@@ -23,18 +25,10 @@ class MyController(
 
   def index = Action.async {
     for {
-      m <- modRequestsDAO.getLast2days
-      b <- beatmapsDAO.getInSet(m.map(_.beatmap_id))
+      m2 <- modRequestsDAO.getLast2days222
     } yield {
-      /*val mySet = m/*.sortBy(_.time)*/.map { modreq =>
-        (modreq, b.find(_.beatmapset_id == modreq.beatmap_id).get)
-      }*/
-      val mySet2 = b.map { bmap =>
-        (m.collectFirst {
-          case i if (i.beatmap_id == bmap.beatmapset_id) => i
-        }.get, bmap)
-      }
-      Ok(views.html.beatmaps(mySet2))
+      val set = m2.sortBy(_._1.time).zipWithIndex.reverse
+      Ok(views.html.beatmaps(set))
     }
   }
 
