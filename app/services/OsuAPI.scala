@@ -17,7 +17,7 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
              wsClient: WSClient, configuration: Configuration) {
 
   //translate ModeStaringJs class to Json
-  implicit lazy val modeStaring_wr = Json.writes[ModeStaringJs]
+  //implicit lazy val modeStaring_wr = Json.writes[ModeStaringJs]
 
   /**
     * MOD MY MAP PLEASEEEEE :3
@@ -71,7 +71,7 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
                     ModeStaringJs(star, version, mode)
                 }
                 //summary of current diffs in MapSet
-                val lms_js = Json.toJson(listModeStar.sortBy(k => (k.mode, k.difficultyrating)))
+                val lms_js = listModeStar.sortBy(k => (k.mode, k.difficultyrating))
 
                 modRequestsDAO.insert(
                   ModRequest(

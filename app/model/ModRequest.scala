@@ -8,6 +8,7 @@ import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 import model.DriverDatabase.api._
 import play.api.db.slick.DatabaseConfigProvider
+import play.twirl.api.Html
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,13 +21,32 @@ case class ModeStaringJs(
                           difficultyrating: Double,
                           version: String,
                           mode: Short
-                        )
+                        ) {
+  def getHtml: Html = {
+    val urlStar =
+      this.difficultyrating match {
+        case x if x <= 1.50 => "https://osu.ppy.sh/images/easy.png"
+        case x if x <= 2.25 => "https://osu.ppy.sh/images/normal.png"
+        case x if x <= 3.75 => "https://osu.ppy.sh/images/hard.png"
+        case x if x <= 5.25 => "https://osu.ppy.sh/images/insane.png"
+        case _ => "https://osu.ppy.sh/images/expert.png"
+      }
+
+    val urlImage =
+      if (this.mode == 0) urlStar
+      else if (this.mode == 1) urlStar.replace(".png", "-t.png")
+      else if (this.mode == 2) urlStar.replace(".png", "-f.png")
+      else urlStar.replace(".png", "-m.png")
+
+    Html(s"""<img src="$urlImage" title="$version ($difficultyrating)">""")
+  }
+}
 
 case class ModRequest(
                        id: Option[Long],
                        time: LocalDateTime,
                        nick: String,
-                       set: JsValue, //List[ModeStaringJs]
+                       set: Seq[ModeStaringJs],
                        beatmap_id: Long)
 
 /*
@@ -38,7 +58,7 @@ class ModRequestsTable(tag: Tag) extends Table[ModRequest](tag, "mod_request") {
   val id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   val time = column[LocalDateTime]("time")
   val nick = column[String]("nick")
-  val set = column[JsValue]("set", O.SqlType("TEXT"))
+  val set = column[Seq[ModeStaringJs]]("set", O.SqlType("TEXT"))
   val beatmap_id = column[Long]("beatmap_id")
 
   lazy val beatmapFk = foreignKey("bm_survey_fk", beatmap_id, DAO.BeatmapsQuery)(r =>
