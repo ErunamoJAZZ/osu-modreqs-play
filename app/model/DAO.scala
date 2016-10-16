@@ -20,7 +20,7 @@ object DAO {
 }
 
 
-class CreatorDB (dbConfig: DatabaseConfig[JdbcProfile]) {
+class CreatorDB(dbConfig: DatabaseConfig[JdbcProfile]) {
 
   lazy val TablesSchema = Array(
     DAO.BeatmapsQuery.schema, DAO.ModRequestsQuery.schema, DAO.SurveysQuery.schema
@@ -30,7 +30,15 @@ class CreatorDB (dbConfig: DatabaseConfig[JdbcProfile]) {
     dbConfig.db.run(TablesSchema.create)
   }
 
-  def drop:Future[Unit] = {
+  def drop: Future[Unit] = {
     dbConfig.db.run(TablesSchema.drop)
+  }
+
+  def createSQL: Future[String] = {
+    Future.successful(TablesSchema.createStatements.mkString("\n"))
+  }
+
+  def dropSQL: Future[String] = {
+    Future.successful(TablesSchema.dropStatements.mkString("\n"))
   }
 }

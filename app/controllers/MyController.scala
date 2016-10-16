@@ -35,6 +35,7 @@ class MyController(
       m2 <- modRequestsDAO.getLast2days222
     } yield {
       val set = m2.sortBy(_._1.time).zipWithIndex.reverse
+      println("---------------------------------------------------------------")
       Ok(views.html.beatmaps(set))
     }
   }
@@ -55,8 +56,8 @@ class MyController(
     */
   def createDB = Action.async {
     if (env.mode == Mode.Dev)
-      creatorDB.create
-        .map(_ => Ok("Listo :)"))
+      creatorDB.createSQL
+        .map(c => Ok(s"$c\n\nListo  :)"))
     else
       Future.successful(NotImplemented("NotImplemented"))
   }
@@ -68,8 +69,8 @@ class MyController(
     */
   def dropDB = Action.async {
     if (env.mode == Mode.Dev)
-      creatorDB.drop
-        .map(_ => Ok("Listo :("))
+      creatorDB.dropSQL
+        .map(d => Ok(s"$d\n\nListo :("))
     else
       Future.successful(NotImplemented("NotImplemented"))
   }

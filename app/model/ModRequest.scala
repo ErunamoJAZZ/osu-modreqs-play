@@ -118,7 +118,9 @@ class ModRequestsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
     } yield b
 
     dbConfig.db.run(q.distinct.result).flatMap { beats =>
+      println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
       val a = beats.map { b =>
+        println("<<<<<<<<<<<<<<<<<<<<<<")
         dbConfig.db.run(DAO.ModRequestsQuery
           .filter(_.beatmap_id === b.beatmapset_id).sortBy(_.time.desc).result.head)
           .map(m => (m, b))
