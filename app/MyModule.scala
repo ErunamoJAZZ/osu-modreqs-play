@@ -3,19 +3,21 @@ import model.{BeatmapsDAO, CreatorDB, ModRequestsDAO, SurveysDAO}
 import slick.backend.DatabaseConfig
 import play.api.i18n.Langs
 import slick.driver.JdbcProfile
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.api.libs.ws.WSClient
 import services.{ChoListener, OsuAPI}
 import akka.actor.ActorSystem
 import play.api.inject.{ApplicationLifecycle, DefaultApplicationLifecycle}
 
-trait GreetingModule {
+trait MyModule {
 
   import com.softwaremill.macwire.MacwireMacros._
 
   def dbConfig: DatabaseConfig[JdbcProfile]
 
   def configuration: Configuration
+
+  def environment: Environment
 
   def wsClient: WSClient
 

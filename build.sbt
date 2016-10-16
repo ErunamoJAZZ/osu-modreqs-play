@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
   specs2 % Test,
   "com.softwaremill.macwire" %% "macros" % "1.0.7",
   "com.softwaremill.macwire" %% "runtime" % "1.0.7",
-  "org.xerial" % "sqlite-jdbc" % "3.14.2.1",
+  //"org.xerial" % "sqlite-jdbc" % "3.14.2.1",
+  "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
   "com.typesafe.slick" %% "slick" % "3.1.1",
   "com.typesafe.play" %% "play-slick" % "2.0.0"
 )

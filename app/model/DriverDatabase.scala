@@ -1,10 +1,10 @@
 package model
 
-import slick.driver.SQLiteDriver
+import slick.driver.PostgresDriver
 import play.api.libs.json.{JsValue, Json}
 
 
-object DriverDatabase extends SQLiteDriver {
+object DriverDatabase extends PostgresDriver {
 
 
   override val api = MyAPI

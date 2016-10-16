@@ -14,15 +14,15 @@ import akka.actor.ActorSystem
 /**
   * Application loader that wires up the application dependencies using Macwire
   */
-class GreetingApplicationLoader extends ApplicationLoader {
+class MyApplicationLoader extends ApplicationLoader {
   def load(context: Context): Application = {
-    (new BuiltInComponentsFromContext(context) with GreetingComponents).application
+    (new BuiltInComponentsFromContext(context) with MyComponents).application
   }
 }
 
-trait GreetingComponents
+trait MyComponents
   extends BuiltInComponents
-    with GreetingModule
+    with MyModule
     with AhcWSComponents // for wsClient
     with I18nComponents
     with DatabaseSlickModule {
