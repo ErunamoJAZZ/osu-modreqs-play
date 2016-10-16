@@ -7,7 +7,8 @@ import play.api.Configuration
 import play.api.libs.json.{JsDefined, JsUndefined, Json}
 import play.api.libs.ws.WSClient
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.DurationInt
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -27,7 +28,7 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
     * @param bm_id
     * @return
     */
-  def modRequetPlz(nick: String, bm_type: Char, bm_id: String): Future[_] = {
+  def modRequetPlz(nick: String, bm_type: Char, bm_id: String): Future[_] = Future {
 
     //get the osuApiKey form configuration
     val osuApiKey = configuration.getConfig("osu").flatMap(_.getString("key")).getOrElse("")
@@ -41,7 +42,8 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
     /**
       * Ask to peppy's api. Thanks peppy ;)
       */
-    wsClient.url(s"$query_base&$bm_type=$bm_id").get().map { r =>
+    val r = Await.result(wsClient.url(s"$query_base&$bm_type=$bm_id").get(), 20.seconds)
+    //.map { r =>
       //get beatmap_id from array head
       r.json.head match {
         case JsUndefined() => play.Logger.warn("Mapset does not exist?")
@@ -61,7 +63,9 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
                 ))
 
               //Get all maps in set
-              wsClient.url(s"$query_base&s=$beatmapset_id").get().map { list_maps =>
+              val list_maps = Await.result(wsClient.url(s"$query_base&s=$beatmapset_id").get(), 20.seconds)
+
+               // .map { list_maps =>
                 val stars = (list_maps.json \\ "difficultyrating").map(_.as[String].toDouble)
                 val versions = (list_maps.json \\ "version").map(_.as[String])
                 val modes = (list_maps.json \\ "mode").map(_.as[String].toShort)
@@ -81,12 +85,12 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
                     lms_js,
                     beatmapset_id.toLong
                   ))
-              }
+              //}
             case None => play.Logger.warn("Strange case where beatmap_id does not exist??")
           }
       }
     }.recover {
       case e => play.Logger.error(s"Error in OsuAPI: $e")
     }
-  }
+  //}
 }
