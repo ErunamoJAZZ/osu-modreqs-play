@@ -10,7 +10,8 @@ import model.DriverDatabase.api._
 import play.api.db.slick.DatabaseConfigProvider
 import play.twirl.api.Html
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.DurationInt
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
@@ -118,7 +119,8 @@ class ModRequestsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
     } yield b
 
     println(q.distinct.result.statements.mkString(";"))
-    dbConfig.db.run(q.distinct.result).flatMap { beats =>
+    dbConfig.db.run(q.distinct.result)
+    .flatMap { beats =>
       println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
       val a = beats.map { b =>
         println("<<<<<<<<<<<<<<<<<<<<<<")
@@ -135,5 +137,28 @@ class ModRequestsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
       (mr, bm)
     }
     dbConfig.db.run(q2.result)*/
+  }
+
+  def getLast2days333: Seq[(ModRequest, Beatmap)] = {
+    val twoDaysAgo = LocalDateTime.now.minusDays(2)
+    val q = for {
+      b <- DAO.BeatmapsQuery
+      m <- DAO.ModRequestsQuery
+      if b.beatmapset_id === m.beatmap_id &&
+        m.time > twoDaysAgo
+    } yield b
+
+    println(q.distinct.result.statements.mkString(";"))
+    val beats = Await.result(dbConfig.db.run(q.distinct.result), 20.seconds)
+
+    println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    val a = beats.map { b =>
+      println("<<<<<<<<<<<<<<<<<<<<<<")
+      Await.result(dbConfig.db.run(DAO.ModRequestsQuery
+        .filter(_.beatmap_id === b.beatmapset_id).sortBy(_.time.desc).result.head)
+        .map(m => (m, b)), 20.seconds)
+    }
+    //Future.sequence(a)
+    a
   }
 }

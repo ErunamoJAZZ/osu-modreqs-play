@@ -40,6 +40,14 @@ class MyController(
     }
   }
 
+  def index3 = Action {
+    val set = modRequestsDAO.getLast2days333.sortBy(_._1.time).zipWithIndex.reverse
+    println("---------------------------------------------------------------")
+    Ok(views.html.beatmaps(set))
+
+  }
+
+
   /**
     * About page
     *
