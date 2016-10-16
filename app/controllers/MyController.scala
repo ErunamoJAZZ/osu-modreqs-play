@@ -90,11 +90,12 @@ class MyController(
     * @param map
     * @return
     */
-  def test(t: String, map: String) = Action.async {
+  def test(t: String, map: String) = Action {
     if (env.mode == Mode.Dev)
       osuApi.modRequetPlz("Eru", t.charAt(0), map).map(_ => Ok)
     else
       Future.successful(NotImplemented("NotImplemented"))
+    Ok
   }
 
 }

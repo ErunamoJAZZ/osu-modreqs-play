@@ -10,6 +10,7 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Try
 
 /**
   * Created by erunamo on 8/10/16.
@@ -28,7 +29,7 @@ class OsuAPI(beatmapsDAO: BeatmapsDAO, modRequestsDAO: ModRequestsDAO,
     * @param bm_id
     * @return
     */
-  def modRequetPlz(nick: String, bm_type: Char, bm_id: String): Future[_] = Future {
+  def modRequetPlz(nick: String, bm_type: Char, bm_id: String): Try[_] = Try {
 
     //get the osuApiKey form configuration
     val osuApiKey = configuration.getConfig("osu").flatMap(_.getString("key")).getOrElse("")
