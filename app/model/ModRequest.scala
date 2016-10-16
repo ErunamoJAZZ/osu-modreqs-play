@@ -117,6 +117,7 @@ class ModRequestsDAO(dbConfig: DatabaseConfig[JdbcProfile]) {
         m.time > twoDaysAgo
     } yield b
 
+    println(q.distinct.result.statements.mkString(";"))
     dbConfig.db.run(q.distinct.result).flatMap { beats =>
       println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
       val a = beats.map { b =>
